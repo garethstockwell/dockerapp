@@ -44,10 +44,17 @@ LOCALTIME = {
     },
 }
 
+VIDEO = {
+    'device': {
+        '/dev/video0': {},
+    },
+}
+
 CAPABILITY = {
     'audio': AUDIO_PULSE,
     'display': DISPLAY_X,
-    'localtime': LOCALTIME
+    'localtime': LOCALTIME,
+    'video': VIDEO,
 }
 
 
@@ -91,8 +98,11 @@ class Run(object):
     def add_devices(self, devices):
         for path_container, data in devices.iteritems():
             path_host = data.get('host', path_container)
-            dev = '{:s}:{:s}'.format(path_host, path_container)
-            self.args +=  [ '--device', dev ]
+            if os.path.exists(path_host):
+                dev = '{:s}:{:s}'.format(path_host, path_container)
+                self.args +=  [ '--device', dev ]
+            else:
+                logging.warn('Host device {:s} not found'.format(path_host))
 
     def add_env_vars(self, env):
         for k, v in env.iteritems():
@@ -101,10 +111,13 @@ class Run(object):
     def add_volumes(self, volumes):
         for path_container, data in volumes.iteritems():
             path_host = data.get('host', path_container)
-            vol = '{:s}:{:s}'.format(path_host, path_container)
-            if data.get('readonly', False):
-                vol += ':ro'
-            self.args += [ '--volume', vol ]
+            if os.path.exists(path_host):
+                vol = '{:s}:{:s}'.format(path_host, path_container)
+                if data.get('readonly', False):
+                    vol += ':ro'
+                self.args += [ '--volume', vol ]
+            else:
+                logging.warn('Host path {:s} not found'.format(path_host))
 
 
 def is_running(name):

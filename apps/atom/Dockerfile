@@ -34,11 +34,9 @@ RUN buildDeps=' \
     && apt-get purge -y --auto-remove $buildDeps
 
 ENV HOME /home/user
-
 ARG USER_UID
 RUN useradd --create-home --home-dir $HOME user --uid $USER_UID \
     && chown -R user:user $HOME
-
 WORKDIR $HOME
 USER user
 

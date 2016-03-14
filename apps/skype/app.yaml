@@ -1,0 +1,12 @@
+# skype/app.yaml
+
+capability:
+    - audio
+    - display
+    - video
+
+volume: {}
+
+option:
+    detach: True
+

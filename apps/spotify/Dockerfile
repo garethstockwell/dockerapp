@@ -21,12 +21,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 ENV HOME /home/user
-
 ARG USER_UID
 RUN useradd --create-home --home-dir $HOME user --uid $USER_UID \
-    && gpasswd -a user audio \
-    && chown -R user:user $HOME
-
+    && chown -R user:user $HOME \
+    && usermod -a -G audio user
 WORKDIR $HOME
 USER user
 
