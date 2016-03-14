@@ -1,0 +1,14 @@
+# spotify/app.yaml
+
+capability:
+    display: {}
+
+volume:
+    /home/.atom:
+        host: ${HOME}/.atom
+
+    /work/local: {}
+
+option:
+    detach: True
+
