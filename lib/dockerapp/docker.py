@@ -9,21 +9,36 @@ import subprocess
 import dockerapp
 from dockerapp import util
 
-CAPABILITY = {
-    'audio': {
-        'device': {
-            '/dev/snd': {}
-        },
+AUDIO_SND = {
+    'device': {
+        '/dev/snd': {}
     },
+}
 
-    'display': {
-        'environment': {
-            'DISPLAY': 'unix${DISPLAY}',
+AUDIO_PULSE = {
+    'volume': {
+        '/dev/shm': {},
+        '/home/user/.pulse': {
+            'host': '${HOME}/.pulse',
         },
-        'volume': {
-            '/tmp/.X11-unix': {},
-        },
+        '/run/user/${USER_UID}/pulse': {},
+        '/var/lib/dbus': {},
+        '/tmp': {},
     },
+}
+
+DISPLAY_X = {
+    'environment': {
+        'DISPLAY': 'unix${DISPLAY}',
+    },
+    'volume': {
+        '/tmp/.X11-unix': {},
+    },
+}
+
+CAPABILITY = {
+    'audio': AUDIO_PULSE,
+    'display': DISPLAY_X,
 }
 
 
@@ -40,6 +55,9 @@ class Run(object):
 
         self.args = [ 'docker', 'run' ]
         self.args += [ '--name', name ]
+
+        if config.get('option.detach', False):
+            self.args.append('--detach')
 
         if tty:
             self.args.append('--tty')
@@ -80,10 +98,31 @@ class Run(object):
             self.args += [ '--volume', vol ]
 
 
+def is_running(name):
+    args = [ 'docker', 'inspect', '-f', '"{{ .Name }}"', name ]
+
+    with open(os.devnull, 'w') as devnull:
+        p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=devnull)
+        for line in iter(p.stdout.readline, ''):
+            if name in line:
+                return True
+
+    return False
+
+
+def restart(name):
+    logging.info('Restarting {:s}'.format(name))
+    args = [ 'docker', 'restart', name ]
+    subprocess.call(args)
+
+
 def run(config, args, env=None, tty=False):
     '''
     Run application described in config, with arguments args.
     '''
+    name = config['name']
+    logging.info('Running {:s} (arguments [{:s}])'.format(name, ' '.join(args)))
+
     r = Run(config, args, env=env, tty=tty)
 
     logging.info(' '.join(r.args))
@@ -101,7 +140,7 @@ def build(config):
     args = [ 'docker', 'build' ]
 
     if uid is not None:
-        args += [ '--build-arg', 'DOCKERAPP_UID={:s}'.format(str(uid)) ]
+        args += [ '--build-arg', 'USER_UID={:s}'.format(str(uid)) ]
 
     version = image_version(name)
     args += [ '-t', '{:s}:{:s}'.format(name, version) ]

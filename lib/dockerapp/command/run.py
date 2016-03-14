@@ -8,6 +8,7 @@ import os
 import dockerapp
 from dockerapp import app
 from dockerapp import docker
+from dockerapp import util
 
 def init_parser(parser):
     parser.add_argument(
@@ -21,9 +22,21 @@ def init_parser(parser):
         action = 'store_true',
         default = False)
 
+    parser.add_argument(
+        '--detach',
+        dest = 'detach',
+        choices = ('yes', 'no'),
+        help = 'run detached from TTY')
+
+
 def run(args, unknown_args):
-    logging.info('Running {:s} (arguments [{:s}])'.format(
-        args.name, ' '.join(unknown_args)))
     config = app.Config(args.name)
-    docker.run(config, unknown_args, tty=args.tty)
+
+    if args.detach is not None:
+        config['option.detach'] = util.str_to_bool(args.detach)
+
+    if docker.is_running(args.name):
+        docker.restart(args.name)
+    else:
+        docker.run(config, unknown_args, tty=args.tty)
 

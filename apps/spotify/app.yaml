@@ -11,3 +11,6 @@ volume:
     /home/spotify/.spotify:
         host: ${HOME}/.spotify
 
+option:
+    detach: True
+

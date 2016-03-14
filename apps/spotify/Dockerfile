@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         alsa-utils \
         libpangoxft-1.0-0 \
         libxss1 \
+        pulseaudio \
         software-properties-common \
         xdg-utils \
     && \
@@ -19,19 +20,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && \
     rm -rf /var/lib/apt/lists/*
 
-ENV HOME /home/spotify
+ENV HOME /home/user
 
-ARG DOCKERAPP_UID
-RUN useradd --create-home --home-dir $HOME spotify --uid $DOCKERAPP_UID \
-    && gpasswd -a spotify audio \
-    && chown -R spotify:spotify $HOME
+ARG USER_UID
+RUN useradd --create-home --home-dir $HOME user --uid $USER_UID \
+    && gpasswd -a user audio \
+    && chown -R user:user $HOME
 
 WORKDIR $HOME
-USER spotify
+USER user
 
 # Make search bar text better
-RUN echo "QLineEdit { color: #000 }" > /home/spotify/spotify-override.css
+RUN echo "QLineEdit { color: #000 }" > /home/user/spotify-override.css
 
 ENTRYPOINT [ "spotify" ]
-CMD [ "-stylesheet=/home/spotify/spotify-override.css" ]
+CMD [ "-stylesheet=/home/user/spotify-override.css --ui.hardware_acceleration=false" ]
 

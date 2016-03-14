@@ -29,6 +29,8 @@ def tree_subst_env(data, env=None):
         e.update(env)
     env = e
 
+    env.update({'USER_UID': str(os.getuid())})
+
     def replace(m):
         key = m.group(0)[2:-1]
         return str(e.get(key, ''))
@@ -38,4 +40,7 @@ def tree_subst_env(data, env=None):
             return re.subn(r'(\$\{[a-zA-Z_]+\})', replace, node)[0]
 
     tree.dfs(data, visit)
+
+def str_to_bool(value):
+    return { 'yes': True, 'no': False }.get(value)
 

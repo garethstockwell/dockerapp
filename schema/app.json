@@ -32,6 +32,13 @@
                     "additionalProperties": false
                 }
             }
+        },
+        "option": {
+            "type": "object",
+            "properties": {
+                "detach": { "type": "boolean" }
+            },
+            "additionalProperties": false
         }
     },
     "additionalProperties": false
