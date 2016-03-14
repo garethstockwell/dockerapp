@@ -1,8 +1,9 @@
 # spotify/app.yaml
 
 capability:
-    audio: {}
-    display: {}
+    - audio
+    - display
+    - localtime
 
 volume:
     /etc/localtime:

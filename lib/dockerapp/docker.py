@@ -36,9 +36,18 @@ DISPLAY_X = {
     },
 }
 
+LOCALTIME = {
+    'volume': {
+        '/etc/localtime': {
+            'readonly': True
+        },
+    },
+}
+
 CAPABILITY = {
     'audio': AUDIO_PULSE,
     'display': DISPLAY_X,
+    'localtime': LOCALTIME
 }
 
 
