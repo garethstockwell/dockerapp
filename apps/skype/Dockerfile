@@ -7,12 +7,13 @@ MAINTAINER Gareth Stockwell <gareth.stockwell.dev@gmail.com>
 ENV DEBIAN_FRONTEND noninteractive
 
 # Setup multiarch because Skype is 32bit only
-# Make sure the repository information is up to date
 RUN dpkg --add-architecture i386 && \
     apt-get update && apt-get install -y --no-install-recommends \
         curl
 
-RUN curl http://download.skype.com/linux/skype-debian_4.3.0.37-1_i386.deb > /usr/src/skype.deb && \ 
+ENV SKYPE_VERSION 4.3.0.37-1
+
+RUN curl http://download.skype.com/linux/skype-debian_${SKYPE_VERSION}_i386.deb > /usr/src/skype.deb && \ 
     dpkg --force-depends -i /usr/src/skype.deb && \
     apt-get install -fy \
     && rm -rf /var/lib/apt/lists/*
