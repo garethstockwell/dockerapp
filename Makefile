@@ -20,6 +20,8 @@ APPS += $1
 $1-build: $(call app_config,$1)
 	$(call dockerapp) build $1
 
+$1: $1-build
+
 .PHONY: $1-build
 )
 endef
