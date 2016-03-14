@@ -1,7 +1,7 @@
 # spotify/Dockerfile
 
 FROM ubuntu:14.04
-MAINTAINER Jessie Frazelle <jess@linux.com>
+MAINTAINER Gareth Stockwell <gareth.stockwell.dev@gmail.com>
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         alsa-utils \

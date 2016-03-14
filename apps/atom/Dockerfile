@@ -1,5 +1,7 @@
+# atom/Dockerfile
+
 FROM debian:jessie
-MAINTAINER Jessica Frazelle <jess@docker.com>
+MAINTAINER Gareth Stockwell <gareth.stockwell.dev@gmail.com>
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
