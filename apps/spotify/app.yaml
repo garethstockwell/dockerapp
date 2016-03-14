@@ -1,0 +1,13 @@
+# spotify/app.yaml
+
+capability:
+    audio: {}
+    display: {}
+
+volume:
+    /etc/localtime:
+        readonly: True
+
+    /home/spotify/.spotify:
+        host: ${HOME}/.spotify
+

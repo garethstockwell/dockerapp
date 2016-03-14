@@ -1,0 +1,39 @@
+{
+    "title": "application configuration data",
+    "type": "object",
+    "properties": {
+        "capability": {
+            "type": "object"
+        },
+        "device": {
+            "type": "object",
+            "patternProperties": {
+                "^(/[^/]+)+$": {
+                    "type": "object",
+                    "properties": {
+                        "host": { "type": "string" }
+                    },
+                    "additionalProperties": false
+                }
+            }
+        },
+        "environment": {
+            "type": "object"
+        },
+        "volume": {
+            "type": "object",
+            "patternProperties": {
+                "^(/[^/]+)+$": {
+                    "type": "object",
+                    "properties": {
+                        "host": { "type": "string" },
+                        "readonly": { "type": "boolean" }
+                    },
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    "additionalProperties": false
+}
+
