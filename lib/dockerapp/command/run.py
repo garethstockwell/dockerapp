@@ -28,6 +28,12 @@ def init_parser(parser):
         choices = ('yes', 'no'),
         help = 'run detached from TTY')
 
+    parser.add_argument(
+        '--shell',
+        dest = 'shell',
+        action = 'store_true',
+        default = False)
+
 
 def run(args, unknown_args):
     config = app.Config(args.name)
@@ -38,5 +44,5 @@ def run(args, unknown_args):
     if docker.is_running(args.name):
         docker.restart(args.name)
     else:
-        docker.run(config, unknown_args, tty=args.tty)
+        docker.run(config, unknown_args, tty=args.tty, shell=args.shell)
 

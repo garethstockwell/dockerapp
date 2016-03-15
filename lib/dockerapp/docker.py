@@ -15,7 +15,7 @@ AUDIO_SND = {
     },
 }
 
-AUDIO_PULSE = {
+AUDIO_PULSE_USER_V1 = {
     'volume': {
         '/dev/shm': {},
         '/home/user/.pulse': {
@@ -24,6 +24,25 @@ AUDIO_PULSE = {
         '/run/user/${USER_UID}/pulse': {},
         '/var/lib/dbus': {},
         '/tmp': {},
+    },
+}
+
+AUDIO_PULSE_USER_V2 = {
+    'volume': {
+        '/dev/shm': {},
+        '/run/pulse': {
+            'host': '${HOME}/.pulse/${DBUS_MACHINE_ID}-runtime',
+        },
+    },
+    'environment': {
+        'PULSE_SERVER': '/run/pulse/native',
+    },
+}
+
+AUDIO_PULSE_USER_SHARED = {
+    'volume': {
+        '/dev/shm': {},
+        '/tmp/pulse-socket': {},
     },
 }
 
@@ -51,7 +70,7 @@ VIDEO = {
 }
 
 CAPABILITY = {
-    'audio': AUDIO_PULSE,
+    'audio': AUDIO_PULSE_USER_V2, #_SHARED,
     'display': DISPLAY_X,
     'localtime': LOCALTIME,
     'video': VIDEO,
@@ -66,17 +85,22 @@ class Run(object):
     '''
     Helper class for building 'docker run' arguments.
     '''
-    def __init__(self, config, args, env, tty):
+    def __init__(self, config, args, env, tty, interactive):
         name = config['name']
 
-        self.args = [ 'docker', 'run' ]
-        self.args += [ '--name', name ]
+        self.docker_cmd = [ 'docker', 'run' ]
 
-        if config.get('option.detach', False):
-            self.args.append('--detach')
+        self.docker_args = [ '--name', name ]
+
+        if interactive:
+            self.docker_args.append('--interactive')
+            self.docker_args.append('--rm')
 
         if tty:
-            self.args.append('--tty')
+            self.docker_args.append('--tty')
+        else:
+            if config.get('option.detach', False):
+                self.docker_args.append('--detach')
 
         for c in config.get('capability', []):
             cap = CAPABILITY[c]
@@ -86,9 +110,14 @@ class Run(object):
         self.update(config)
 
         version = image_version(name)
-        self.args += [ '{:s}:{:s}'.format(name, version) ]
+        self.docker_image = [ '{:s}:{:s}'.format(name, version) ]
 
-        self.args += args
+        self.app_args = args
+
+    @property
+    def args(self):
+        return self.docker_cmd + self.docker_args + \
+            self.docker_image + self.app_args
 
     def update(self, config):
         self.add_devices(config.get('device', {}))
@@ -100,13 +129,13 @@ class Run(object):
             path_host = os.path.realpath(data.get('host', path_container))
             if os.path.exists(path_host):
                 dev = '{:s}:{:s}'.format(path_host, path_container)
-                self.args +=  [ '--device', dev ]
+                self.docker_args +=  [ '--device', dev ]
             else:
                 logging.warn('Host device {:s} not found'.format(path_host))
 
     def add_env_vars(self, env):
         for k, v in env.iteritems():
-            self.args += [ '-e', '{:s}={:s}'.format(k, str(v)) ]
+            self.docker_args += [ '-e', '{:s}={:s}'.format(k, str(v)) ]
 
     def add_volumes(self, volumes):
         for path_container, data in volumes.iteritems():
@@ -115,7 +144,7 @@ class Run(object):
                 vol = '{:s}:{:s}'.format(path_host, path_container)
                 if data.get('readonly', False):
                     vol += ':ro'
-                self.args += [ '--volume', vol ]
+                self.docker_args += [ '--volume', vol ]
             else:
                 logging.warn('Host path {:s} not found'.format(path_host))
 
@@ -138,14 +167,23 @@ def restart(name):
     subprocess.call(args)
 
 
-def run(config, args, env=None, tty=False):
+def run(config, args, env=None, tty=False, shell=False):
     '''
     Run application described in config, with arguments args.
     '''
     name = config['name']
     logging.info('Running {:s} (arguments [{:s}])'.format(name, ' '.join(args)))
 
-    r = Run(config, args, env=env, tty=tty)
+    interactive = False
+
+    if shell is True:
+        interactive = True
+        tty = True
+
+    r = Run(config, args, env=env, interactive=interactive, tty=tty)
+
+    if shell is True:
+        r.docker_args += [ '--entrypoint', '/bin/bash' ]
 
     logging.info(' '.join(r.args))
 

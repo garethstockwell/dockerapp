@@ -19,6 +19,10 @@ def import_module(name):
 
     return _import(name)
 
+def dbus_machine_id():
+    with open('/var/lib/dbus/machine-id') as f:
+        return f.read().strip()
+
 def tree_subst_env(data, env=None):
     import os
     import re
@@ -29,7 +33,8 @@ def tree_subst_env(data, env=None):
         e.update(env)
     env = e
 
-    env.update({'USER_UID': str(os.getuid())})
+    env['DBUS_MACHINE_ID'] = dbus_machine_id()
+    env['USER_UID'] = str(os.getuid())
 
     def replace(m):
         key = m.group(0)[2:-1]
