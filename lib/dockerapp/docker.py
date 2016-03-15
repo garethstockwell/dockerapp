@@ -97,7 +97,7 @@ class Run(object):
 
     def add_devices(self, devices):
         for path_container, data in devices.iteritems():
-            path_host = data.get('host', path_container)
+            path_host = os.path.realpath(data.get('host', path_container))
             if os.path.exists(path_host):
                 dev = '{:s}:{:s}'.format(path_host, path_container)
                 self.args +=  [ '--device', dev ]
@@ -110,7 +110,7 @@ class Run(object):
 
     def add_volumes(self, volumes):
         for path_container, data in volumes.iteritems():
-            path_host = data.get('host', path_container)
+            path_host = os.path.realpath(data.get('host', path_container))
             if os.path.exists(path_host):
                 vol = '{:s}:{:s}'.format(path_host, path_container)
                 if data.get('readonly', False):
