@@ -9,8 +9,8 @@ volume:
     /etc/localtime:
         readonly: True
 
-    /home/spotify/.spotify:
-        host: ${HOME}/.spotify
+    /home/spotify/.config/spotify:
+        host: ${HOME}/.config/spotify
 
 option:
     detach: True
